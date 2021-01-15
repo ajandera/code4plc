@@ -8,5 +8,8 @@ ARG CLASSPATH=${CLASSPATH}:/tmp/mysql-connector-java-8.0.21.jar
 ENV CLASSPATH ${CLASSPATH}:/tmp/protobuf-java-3.11.4.jar
 ARG CLASSPATH=${CLASSPATH}:/tmp/protobuf-java-3.11.4.jar
 
+ENV CLASSPATH ${CLASSPATH}:/tmp/gson-2.8.6.jar
+ARG CLASSPATH=${CLASSPATH}:/tmp/gson-2.8.6.jar
+
 WORKDIR /tmp
 ENTRYPOINT ["java", "App"]

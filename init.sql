@@ -21,3 +21,14 @@ create table application
             on update cascade on delete cascade
 );
 
+create table setting
+(
+    id int auto_increment primary key,
+    application_id int null,
+    key varchar(50) null,
+    value varchar(50) null,
+    constraint setting_application_id_fk
+        foreign key (application_id) references application (id)
+            on update cascade on delete cascade
+);
+

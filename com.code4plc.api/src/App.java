@@ -1,3 +1,9 @@
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpServer;
+import utils.Password;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,67 +14,28 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.HttpServer;
-import utils.ParameterFilter;
-import utils.Password;
 
 /**
  * Application to handle API requests.
  */
 public class App {
     public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8590), 0);
-        HttpContext login = server.createContext("/api/v1/user/login", (exchange -> {
-            if ("POST".equals(exchange.getRequestMethod())) {
-                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
-                BufferedReader br = new BufferedReader(isr);
-
-                int b;
-                StringBuilder buf = new StringBuilder();
-                while ((b = br.read()) != -1) {
-                    buf.append((char) b);
-                }
-
-                br.close();
-                isr.close();
-
-                Map requestParams = (Map)exchange.getAttribute("parameters");
-                List<String> params = new ArrayList<>();
-                params.add(requestParams.get("username").toString());
-
-                String providedPassword = requestParams.get("password").toString();
-                ResultSet rs = null;
-                try {
-                    rs = Database.query("SELECT * FROM user WHERE username = ?", params);
-                    while (rs.next()) {
-                        String securePassword = rs.getString("password");
-                        String salt = rs.getString("salt");
-                        boolean passwordMatch = Password.verifyUserPassword(providedPassword, securePassword, salt);
-                        if (passwordMatch) {
-                            System.out.println("Provided user password " + providedPassword + " is correct.");
-                        } else {
-                            System.out.println("Provided password is incorrect");
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                exchange.sendResponseHeaders(200, buf.toString().getBytes().length);
-                OutputStream output = exchange.getResponseBody();
-                output.write(buf.toString().getBytes());
-                output.flush();
+        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+        server.createContext("/", (exchange -> {
+            if ("GET".equals(exchange.getRequestMethod())) {
+                String response = "Api server is running!";
+                exchange.sendResponseHeaders(200, response.getBytes().length);//response code and length
+                OutputStream os = exchange.getResponseBody();
+                os.write(response.getBytes());
+                os.close();
             } else {
                 exchange.sendResponseHeaders(405, -1);// 405 Method Not Allowed
             }
             exchange.close();
         }));
-        HttpContext register = server.createContext("/api/v1/user/register", (exchange -> {
+        server.createContext("/api/v1/user/login", (exchange -> {
             if ("POST".equals(exchange.getRequestMethod())) {
-                boolean result;
                 String response;
 
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
@@ -82,32 +49,34 @@ public class App {
 
                 br.close();
                 isr.close();
-
-                OutputStream output = exchange.getResponseBody();
-                output.write(exchange.getAttribute("parameters").toString().getBytes());
+                String jsonString = buf.toString();
+                Gson gson = new Gson();
+                JsonObject object = gson.fromJson(jsonString, JsonObject.class);
 
                 List<String> params = new ArrayList<>();
-                params.add(requestParams.get("username").toString());
-                String password = requestParams.get("password").toString();
-                String salt = Password.getSalt(20);
-                String passwordSecure = Password.generateSecurePassword(password, salt);
-                params.add(passwordSecure);
-                params.add(salt);
+                params.add(object.get("username").getAsString());
+                String providedPassword = object.get("password").getAsString();
 
                 try {
-                    result = Database.insert("INSERT INTO user(username, password, salt) VALUES(?, ?, ?)", params);
-                } catch (SQLException e) {
-                    result = false;
-                    output.write(e.getMessage().getBytes());
-                }
-                if (result) {
-                    exchange.sendResponseHeaders(200, buf.toString().getBytes().length);
-                    response = "Successfully registered";
-                } else {
-                    exchange.sendResponseHeaders(500, buf.toString().getBytes().length);
-                    response = "Internal server error";
+                    ResultSet rs = Database.query("SELECT * FROM user WHERE username = ?", params);
+                    while (true) {
+                        assert rs != null;
+                        if (!rs.next()) break;
+                        String securePassword = rs.getString("password");
+                        String salt = rs.getString("salt");
+                        boolean passwordMatch = Password.verifyUserPassword(providedPassword, securePassword, salt);
+                        if (passwordMatch) {
+                            response = "{\"success\": \"true\", \"user\": \""+rs.getString("id")+"\", \"username\": \""+rs.getString("username")+"\"}";
+                        } else {
+                            response = "{\"success\": \"true\", \"message\": \"Provided password is incorrect\"}";
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
 
+                exchange.sendResponseHeaders(200, response.getBytes().length);
+                OutputStream output = exchange.getResponseBody();
                 output.write(response.getBytes());
                 output.flush();
             } else {
@@ -115,8 +84,10 @@ public class App {
             }
             exchange.close();
         }));
-        HttpContext save = server.createContext("/api/v1/app/save", (exchange -> {
+        server.createContext("/api/v1/user/register", (exchange -> {
             if ("POST".equals(exchange.getRequestMethod())) {
+                String response;
+
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(isr);
 
@@ -128,10 +99,69 @@ public class App {
 
                 br.close();
                 isr.close();
+                String jsonString = buf.toString();
+                Gson gson = new Gson();
+                JsonObject object = gson.fromJson(jsonString, JsonObject.class);
 
-                exchange.sendResponseHeaders(200, buf.toString().getBytes().length);
+                List<String> params = new ArrayList<>();
+                params.add(object.get("username").getAsString());
+                String password = object.get("password").getAsString();
+                String salt = Password.getSalt(20);
+                String passwordSecure = Password.generateSecurePassword(password, salt);
+                params.add(passwordSecure);
+                params.add(salt);
+
+                try {
+                    Database.insert("INSERT INTO user(username, password, salt) VALUES(?, ?, ?)", params);
+                    response = "{\"success\": \"true\", \"message\": \"Successfully registered\"}";
+                } catch (SQLException e) {
+                    response = "{\"success\": \"false\", \"message\": \"Registration failed\"}";
+                }
+
+                exchange.sendResponseHeaders(200, response.length());
                 OutputStream output = exchange.getResponseBody();
-                output.write(buf.toString().getBytes());
+                output.write(response.getBytes());
+                output.flush();
+            } else {
+                exchange.sendResponseHeaders(405, -1);// 405 Method Not Allowed
+            }
+            exchange.close();
+        }));
+        server.createContext("/api/v1/app/save", (exchange -> {
+            if ("POST".equals(exchange.getRequestMethod())) {
+                String response;
+
+                InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(isr);
+
+                int b;
+                StringBuilder buf = new StringBuilder();
+                while ((b = br.read()) != -1) {
+                    buf.append((char) b);
+                }
+
+                br.close();
+                isr.close();
+                String jsonString = buf.toString();
+                Gson gson = new Gson();
+                JsonObject object = gson.fromJson(jsonString, JsonObject.class);
+
+                List<String> params = new ArrayList<>();
+                params.add(object.get("user").getAsString());
+                params.add(object.get("name").getAsString());
+                params.add(object.get("content").getAsString());
+                params.add(salt);
+
+                try {
+                    Database.insert("INSERT INTO aplication(user_id, name, content) VALUES(?, ?, ?)", params);
+                    response = "{\"success\": \"true\", \"message\": \"Successfully saved\"}";
+                } catch (SQLException e) {
+                    response = "{\"success\": \"false\", \"message\": \"Save failed\"}";
+                }
+
+                exchange.sendResponseHeaders(200, response.length());
+                OutputStream output = exchange.getResponseBody();
+                output.write(response.getBytes());
                 output.flush();
             } else {
                 exchange.sendResponseHeaders(405, -1);// 405 Method Not Allowed
@@ -139,7 +169,7 @@ public class App {
             exchange.close();
         }));
         server.createContext("/api/v1/app/load", (exchange -> {
-            if ("POST".equals(exchange.getRequestMethod())) {
+            if ("GET".equals(exchange.getRequestMethod())) {
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(isr);
 
@@ -161,8 +191,10 @@ public class App {
             }
             exchange.close();
         }));
-        HttpContext setting = server.createContext("/api/v1/setting/save", (exchange -> {
+        server.createContext("/api/v1/setting/save", (exchange -> {
             if ("POST".equals(exchange.getRequestMethod())) {
+                String response;
+
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(isr);
 
@@ -174,10 +206,25 @@ public class App {
 
                 br.close();
                 isr.close();
+                String jsonString = buf.toString();
+                Gson gson = new Gson();
+                JsonObject object = gson.fromJson(jsonString, JsonObject.class);
 
-                exchange.sendResponseHeaders(200, buf.toString().getBytes().length);
+                List<String> params = new ArrayList<>();
+                params.add(object.get("application").getAsString());
+                params.add(object.get("keyIndex").getAsString());
+                params.add(object.get("value").getAsString());
+
+                try {
+                    Database.insert("INSERT INTO setting(application_id, keyIndex, value) VALUES(?, ?, ?)", params);
+                    response = "{\"success\": \"true\", \"message\": \"Successfully saved\"}";
+                } catch (SQLException e) {
+                    response = "{\"success\": \"false\", \"message\": \"Save failed\"}";
+                }
+
+                exchange.sendResponseHeaders(200, response.length());
                 OutputStream output = exchange.getResponseBody();
-                output.write(buf.toString().getBytes());
+                output.write(response.getBytes());
                 output.flush();
             } else {
                 exchange.sendResponseHeaders(405, -1);// 405 Method Not Allowed
@@ -185,7 +232,7 @@ public class App {
             exchange.close();
         }));
         server.createContext("/api/v1/setting/load", (exchange -> {
-            if ("POST".equals(exchange.getRequestMethod())) {
+            if ("GET".equals(exchange.getRequestMethod())) {
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(isr);
 
@@ -207,10 +254,6 @@ public class App {
             }
             exchange.close();
         }));
-        //login.getFilters().add(new ParameterFilter());
-        //register.getFilters().add(new ParameterFilter());
-        //save.getFilters().add(new ParameterFilter());
-        //setting.getFilters().add(new ParameterFilter());
         server.setExecutor(null); // creates a default executor
         server.start();
     }

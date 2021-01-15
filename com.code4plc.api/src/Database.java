@@ -46,7 +46,6 @@ public class Database implements Connector {
 
             // PreparedStatements can use variables and are more efficient
             PreparedStatement preparedStatement = connect.prepareStatement(sql);
-            System.out.println(sql);
 
             // Set parameters if needed
             int i = 1;

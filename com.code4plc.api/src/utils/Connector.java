@@ -5,8 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public interface Connector {
-    public static Connection connect() throws SQLException {
+    static Connection connect() throws SQLException {
         // Setup the connection with the DB
-        return DriverManager.getConnection("jdbc:mysql://db/code4plc?user=root&password=root");
+        return DriverManager.getConnection("jdbc:mysql://db:3306/code4plc?user=root&password=root");
     }
 }
