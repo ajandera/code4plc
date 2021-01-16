@@ -14,7 +14,7 @@ services:
         volumes:
           - ".:/var/www/html"
         ports:
-            - 9000:8080
+            - 9000:8000
     vue-ui:
         build: ./app
         ports:

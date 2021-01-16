@@ -1,10 +1,12 @@
+package model;
+
 import utils.Connector;
 
 import java.sql.*;
 import java.util.*;
 
 /**
- * Database wrapper class
+ * model.Database wrapper class
  */
 public class Database implements Connector {
 
@@ -17,7 +19,6 @@ public class Database implements Connector {
             Connection connect = Connector.connect();
             // PreparedStatements can use variables and are more efficient
             PreparedStatement preparedStatement = connect.prepareStatement(sql);
-            System.out.println(sql);
 
             // Set parameters if needed
             int i = 1;
