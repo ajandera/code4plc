@@ -13,10 +13,6 @@ public class Setting {
         this.id = id;
     }
 
-    public void setApplication(Integer application) {
-        this.application = application;
-    }
-
     public void setKeyIndex(String keyIndex) {
         this.keyIndex = keyIndex;
     }

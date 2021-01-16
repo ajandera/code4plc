@@ -8,8 +8,6 @@ import java.sql.Timestamp;
 public class User {
     String id;
     String username;
-    String password;
-    String salt;
     Timestamp last_login;
 
     public void setId(String id) {

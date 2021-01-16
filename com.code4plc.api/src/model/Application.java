@@ -13,10 +13,6 @@ public class Application {
         this.id = id;
     }
 
-    public void setUser(Integer user) {
-        this.user = user;
-    }
-
     public void setContent(String content) {
         this.content = content;
     }
