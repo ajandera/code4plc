@@ -1,11 +1,22 @@
 <template>
-  <div id="result"></div>
+  <div id="result">
+    <div id="editor">
+      <br>
+      <label for="resultView">Results from PLC emulator</label>
+      <textarea v-model="result" id="resultView" class="form-control"></textarea>
+    </div>
+  </div>
 </template>
 
 <script>
 
 export default {
-  name: 'Result'
+  name: 'Result',
+  data: function() {
+    return {
+      result: null
+    }
+  },
 }
 
 </script>
@@ -14,6 +25,10 @@ export default {
 
 #result {
 
+}
+
+#resultView {
+  height: 600px;
 }
 
 </style>

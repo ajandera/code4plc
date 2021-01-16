@@ -1,24 +1,15 @@
 <template>
   <div id="setting">
-
-    <Header/>
-
-    <button @click="show" class="btn" type="button">
-      Show setting
-    </button>
-
-    <modal name="setting" :width="605" :height="500" :adaptive="false">
-        <div class="modal-dialog">
-          <!-- Modal content-->
-          <div class="modal-content">
-            <div class="modal-header">
-              <h3 class="modal-title">Setting</h3>
-              <button @click="hide" type="button" class="close" data-dismiss="modal">×</button>
-            </div>
-
-          </div>
-        </div>
-    </modal>
+    <div v-for="item in setting" class="row mt-2" v-bind:key="item">
+      <div class="col-6">
+        <input type="text" v-model="item.key" class="form-control">
+      </div>
+      <div class="col-6">
+        <input type="text" v-model="item.value" class="form-control">
+      </div>
+    </div>
+    <br>
+    <button v-on:click="add" class="btn btn-success"><font-awesome-icon icon="plus" /></button>
   </div>
 </template>
 
@@ -31,27 +22,18 @@ export default {
   components: {},
   data: function() {
     return {
-      setting: {}
+      setting: []
     }
   },
-  mounted() {
-    axios.get("java/api/v1/setting/load")
-      .then(response => {
-        this.setting = response.data;
-      });
-  },
   methods: {
-    show() {
-      this.$modal.show('setting')
-    },
-    hide() {
-      this.$modal.hide('setting')
-    },
     save() {
       axios.post("java/api/v1/setting/save", {"setting": this.setting})
           .then(response => {
             this.message = response.data;
           });
+    },
+    add() {
+      this.setting.push({'key': '', 'value': ''});
     }
   }
 }

@@ -1,9 +1,12 @@
 <template>
     <div id="editor">
-        <Header/>
         <div class="message" v-if="message">{{ message }}</div>
-        <label for="codeEditor"></label>
-        <textarea v-model="code" id="codeEditor"></textarea>
+        <br>
+        <label for="codeEditor">Write your code in Structured text</label>
+        <textarea v-model="code" id="codeEditor" class="form-control"></textarea>
+        <div class="mt-3 float-right">
+          <input type="checkbox" v-mode="autosave"> Autosave <button v-on:click="save" class="btn btn-lg btn-success">Save</button>
+        </div>
     </div>
 </template>
 
@@ -17,14 +20,9 @@ export default {
   data: function() {
     return {
       code:  null,
-      message: null
+      message: null,
+      autosave: false
     }
-  },
-  mounted() {
-    axios.get("java/api/v1/app/load")
-        .then(response => {
-            this.code = response.data;
-        });
   },
   methods: {
     save() {
@@ -44,7 +42,7 @@ export default {
 }
 
 #codeEditor {
-
+  height: 600px;
 }
 
 </style>
