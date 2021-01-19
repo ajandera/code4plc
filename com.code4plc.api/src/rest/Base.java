@@ -19,6 +19,7 @@ public class Base {
      */
     public static void doGet(HttpExchange exchange) throws IOException {
         if ("GET".equals(exchange.getRequestMethod())) {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
             String response = "Api server is running!";
             exchange.sendResponseHeaders(200, response.getBytes().length);//response code and length
             OutputStream os = exchange.getResponseBody();

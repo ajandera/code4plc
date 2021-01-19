@@ -130,7 +130,6 @@ public class User extends Base{
      */
     public static void registration(HttpExchange exchange) throws IOException {
         if ("POST".equals(exchange.getRequestMethod())) {
-
             InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
             BufferedReader br = new BufferedReader(isr);
 
@@ -160,6 +159,8 @@ public class User extends Base{
                 response.setSuccess(true);
                 response.setMessage("Successfully registered");
                 String jsonResponse = gson.toJson(response);
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods","POST");
                 exchange.sendResponseHeaders(200, jsonResponse.length());
                 OutputStream output = exchange.getResponseBody();
                 output.write(jsonResponse.getBytes());
@@ -168,6 +169,8 @@ public class User extends Base{
                 response.setSuccess(false);
                 response.setMessage("Registration failed");
                 String jsonResponse = gson.toJson(response);
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Methods","POST");
                 exchange.sendResponseHeaders(200, jsonResponse.length());
                 OutputStream output = exchange.getResponseBody();
                 output.write(jsonResponse.getBytes());

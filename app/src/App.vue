@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header/>
-    <section class="main">
+    <section class="main mt-3">
       <div class="container-fluid">
         <div class="row">
           <div class="col-7">
@@ -14,8 +14,8 @@
           </div>
           <div class="col-5">
             <ul class="nav nav-tabs" id="sideNavList">
-              <li class="nav-item" v-for="tab in plcTabs" :key="tab" @click="selectedPlc = tab;">
-                <a v-bind:class="[selectedPlc === tab ? 'nav-link active' : 'nav-link']" href="#">{{ tab }}</a>
+              <li class="nav-item" v-for="tabPlc in plcTabs" :key="tabPlc" @click="selectedPlc = tabPlc;">
+                <a v-bind:class="[selectedPlc === tabPlc ? 'nav-link active' : 'nav-link']" href="#">{{ tabPlc }}</a>
               </li>
             </ul>
             <component :is="selectedPlc" class="tab"></component>
@@ -36,12 +36,13 @@ import Help from "@/components/Help";
 
 export default {
   name: 'App',
-  data: function () {
+  data() {
     return {
       tabs: ["Editor", "Help"],
       selected: "Editor",
       plcTabs: ["Result", "Setting"],
-      selectedPlc: "Result"
+      selectedPlc: "Result",
+      loggedUser: null
     }
   },
   components: {
@@ -53,14 +54,3 @@ export default {
   }
 }
 </script>
-
-<style lang="css" scoped>
-
-#app {
-
-}
-
-.main {
-  margin-top: 30px;
-}
-</style>

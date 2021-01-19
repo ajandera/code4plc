@@ -6,10 +6,6 @@ import VueSession from 'vue-session'
 import VModal from 'vue-js-modal'
 
 import App from './App.vue'
-import Editor from './components/Editor.vue'
-import Setting from './components/Setting.vue'
-import Result from './components/Result.vue'
-import Sign from './components/Sign.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
@@ -25,11 +21,7 @@ Vue.config.productionTip = true
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 const routes = [
-  { path: '/', component: App },
-  { path: '/editor', component: Editor },
-  { path: '/setting', component: Setting },
-  { path: '/result', component: Result },
-  { path: '/sign', component: Sign },
+  { path: '/', component: App }
 ]
 const router = new VueRouter({
   mode: 'history',
