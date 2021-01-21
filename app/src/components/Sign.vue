@@ -1,7 +1,12 @@
 <template>
   <div id="sign">
     <button v-if="!loggedUser" @click="show" class="btn btn-outline-success" type="submit">Sign In / Sign Up</button>
-    <p v-if="loggedUser">{{ loggedUser }}</p>
+    <table v-if="loggedUser">
+      <tr>
+        <td>{{ loggedUser }}</td>
+        <td><button v-if="loggedUser" @click="logout" class="btn btn-outline-danger" type="submit">Sign out</button></td>
+      </tr>
+    </table>
     <modal name="sign" :width="600" :height="530" :adaptive="true">
       <div class="modal-dialog">
         <!-- Modal content-->
@@ -104,6 +109,11 @@ export default {
               this.messageClass = "alert alert-danger";
             }
           });
+    },
+    logout() {
+      window.localStorage.removeItem("userId");
+      window.localStorage.removeItem("user");
+      this.loggedUser = null;
     },
     register() {
       axios.post(
