@@ -51,6 +51,13 @@ public class Application extends Base {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            System.out.println(exchange.getRequestMethod());
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+            exchange.sendResponseHeaders(204, -1);
+            return;
         } else {
             exchange.sendResponseHeaders(405, -1);// 405 Method Not Allowed
         }
@@ -102,6 +109,12 @@ public class Application extends Base {
                 output.write(jsonResponse.getBytes());
                 output.flush();
             }
+        } else if ("OPTIONS".equals(exchange.getRequestMethod())) {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "*");
+            exchange.sendResponseHeaders(204, -1);
+            return;
         } else {
             exchange.sendResponseHeaders(405, -1);// 405 Method Not Allowed
         }

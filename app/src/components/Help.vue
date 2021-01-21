@@ -1,6 +1,7 @@
 <template>
   <div class="row">
-    <div class="col-12 mt-2">
+    <div class="container">
+      <div class="col-10 mt-2">
       <h3>1. Registration </h3>
       <p>Each user can register for the application using their email, which is also a login name and is unique. It is possible to have only one account under one email. Registration is free. Registration does not currently require two-factor verification. All features of the application are available immediately after registration. </p>
       <h3>2. Login </h3>
@@ -26,6 +27,7 @@
       <p> Loading parameters is tied to the selected application and takes place automatically after selecting and loading the saved application. This operation takes place in the background and there is no need to worry about it. </p>
       <h3>12. Code run in PLC editor </h3>
       <p> The emulator simulates very basic PLC functions, ie running the application in a periodic loop with a basic refresh period of 1s, in the user settings it is possible to define the variable plcLoop in milliseconds and then the application will run in the selected time period. Every single cycle, the program written in the editor runs and the variables are updated according to the entered code. A listing of each cycle can be seen in the left block with a listing of data from the emulated PLC. </p>
+    </div>
     </div>
   </div>
 </template>
